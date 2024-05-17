@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import pickle
 import numpy as np
 
@@ -10,7 +10,7 @@ model = pickle.load(open('model.pkl', 'rb'))
 
 @app.route('/')
 def home():
-    return "Hello, this is a basic ML model deployment!"
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
