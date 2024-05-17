@@ -6,7 +6,12 @@ import numpy as np
 app = Flask(__name__)
 
 # Load the model
-model = pickle.load(open('model.pkl', 'rb'))
+try:
+    model = pickle.load(open('model.pkl', 'rb'))
+    print("Model loaded successfully")
+except Exception as e:
+    print(f"Error loading model: {e}")
+    model = None
 
 @app.route('/')
 def home():
@@ -14,11 +19,28 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json(force=True)
-    experience = data['experience']
-    prediction = model.predict(np.array([[experience]]))
-    output = prediction[0]
-    return jsonify({'salary': output})
+    try:
+        if model is None:
+            raise Exception("Model is not loaded")
+        
+        data = request.get_json(force=True)
+        print(f"Received data: {data}")
+        
+        experience = data['experience']
+        print(f"Experience: {experience}")
+        
+        # Convert experience to a numeric value
+        experience = float(experience)
+        print(f"Numeric Experience: {experience}")
+        
+        prediction = model.predict(np.array([[experience]]))
+        print(f"Prediction: {prediction}")
+        
+        output = prediction[0]
+        return jsonify({'salary': output})
+    except Exception as e:
+        print(f"Error during prediction: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
